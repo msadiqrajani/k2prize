@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Hitachi - Prize Entry</title>
+  <meta name="description" content="">
+  <link href="./favicon.png" rel="shortcut icon">
+
+  <link rel="stylesheet" href="main.css">
+  <script src="plugins.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.10.1/polyfill.min.js"></script>
+</head>
+<body class="entry">
+  
+  <header class="site-header">
+    <a class="site-logo" href="#"><img src="img/hitachi-logo.svg" width="138" height="40" alt="Hitachi"></a>
+  </header>
+  
+  
+  <div class="container">
+    <div class="row">
+      
+      <div class="col-sm-6">
+        <div class="form-container">
+          
+          <div class="state-1">
+            <h1>Enter your Key2 code to see if you’ve unlocked a great prize.</h1>
+            <form name="submit-to-google-sheet">
+              <input name="surname" type="text" placeholder="Surname" required>
+              <input name="code" type="text" placeholder="Enter your key2 code here" required>
+              <button class="form-submit" type="submit">Try your luck</button>
+              <input id="form-winner" name="winner" type="hidden" value="">
+            </form>
+          </div>
+          
+          <div class="state-loading js-loading is-hidden">
+            <h2>KEY2CODE<br/>ACCEPTED...</h2>
+          </div>
+          
+          <div class="state-loss js-message is-hidden">
+            <h2>NO WIN...</h2>
+            <p class="lead">We’re sorry you’re<br/>not a winner.</p>
+          </div>
+          
+          <div class="state-winner js-winner-message is-hidden">
+            <h2>YOU ARE<br/>A WINNER!...</h2>
+          </div>
+          
+          <div class="state-error js-error-message is-hidden">
+            <h2>CODE HAS<br/>ALREADY BEEN USED...</h2>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-sm-6 pos-relative">
+        <div class="winner-prize is-hidden">
+          <h3>YOU’VE<br/>WON!</h3>
+          <h4 id="prize"></h4>
+          <p>Congratulations! We’ll send you details of how to claim your prize very soon!</p>
+        </div>
+        <img class="safe safe-1" src="img/safe-1.png" alt="Closed">
+        <img class="safe safe-2 is-hidden" src="img/safe-2.png" alt="Closed">
+        <img class="safe safe-3 is-hidden" src="img/safe-3.png" alt="Empty">
+        <img class="safe safe-4 is-hidden" src="img/safe-4.png" alt="Winner">
+      </div> 
+      
+    </div>
+  </div>
+  
+  <footer class="site-footer">
+    <img src="img/hitachi-copy.svg" width="233" height="36" alt="Hitachi Capital">
+  </footer>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxDgAUp-FMUpV8UmGrf4RviaGZhjNBpKjXh1W5HXM4XQjzC7sl8/exec'
+    const form = document.forms['submit-to-google-sheet']
+    
+    const state1 = document.querySelector('.state-1')
+    const loading = document.querySelector('.js-loading')
+    
+    const safe1 = document.querySelector('.safe-1')
+    const safe2 = document.querySelector('.safe-2')
+    const safe3 = document.querySelector('.safe-3')
+    const safe4 = document.querySelector('.safe-4')
+    
+    const winnerPrize = document.querySelector('.winner-prize')
+    
+    const successMessage = document.querySelector('.js-message')
+    const winnerMessage = document.querySelector('.js-winner-message')
+    const errorMessage = document.querySelector('.js-error-message')
+    
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      formCodes();
+    });
+    
+    function formCodes() {
+      var formCode = document.forms['submit-to-google-sheet']['code'].value;
+      
+      if (formCode > 'K'+20001 && formCode < 'K'+20459) {
+        
+        // iPad
+        if (formCode == 'K20131' || formCode == 'K20144') {
+          document.getElementById('form-winner').value = 'ipad';
+        }
+        
+        // Voucher
+        if (formCode == 'K20044' || formCode == 'K20053' || formCode == 'K20137' || formCode == 'K20174' || formCode == 'K20203' || formCode == 'K20211' || formCode == 'K20251' || formCode == 'K20283' || formCode == 'K20289' || formCode == 'K20352' || formCode == 'K20362' || formCode == 'K20441') {
+          document.getElementById('form-winner').value = 'voucher';
+        }
+        
+        // Speaker
+        if (formCode == 'K20151' || formCode == 'K20337' || formCode == 'K20442') {
+          document.getElementById('form-winner').value = 'speaker';
+        }
+    
+        showLoadingIndicator();
+        fetch(scriptURL, {
+          method: 'POST',
+          body: new FormData(form)
+        }).then(function (response) {
+          return showSuccessMessage(response);
+        }).catch(function (error) {
+          return showErrorMessage(error);
+        });
+        return;
+        
+      } else {
+        
+        alert('Enter a Valid Code');
+        return false;
+        
+      }
+    }
+
+    function showLoadingIndicator() {
+      state1.classList.add('is-hidden');
+      safe1.classList.add('is-hidden');
+      loading.classList.remove('is-hidden');
+      safe2.classList.remove('is-hidden');
+    }
+    
+    function showSuccessMessage(response) {
+      setTimeout(function () {
+        if (document.getElementById('form-winner').value == 'ipad') {
+          
+          winnerMessage.classList.remove('is-hidden');
+          loading.classList.add('is-hidden');
+          safe2.classList.add('is-hidden');
+          safe4.classList.remove('is-hidden');
+          winnerPrize.classList.remove('is-hidden');
+          
+          document.getElementById("prize").innerHTML="An iPad";
+          
+        } else if (document.getElementById('form-winner').value == 'voucher') {
+          
+          winnerMessage.classList.remove('is-hidden');
+          loading.classList.add('is-hidden');
+          safe2.classList.add('is-hidden');
+          safe4.classList.remove('is-hidden');
+          winnerPrize.classList.remove('is-hidden');
+          
+          document.getElementById("prize").innerHTML="A voucher";
+          
+        } else if (document.getElementById('form-winner').value == 'speaker') {
+          
+          winnerMessage.classList.remove('is-hidden');
+          loading.classList.add('is-hidden');
+          safe2.classList.add('is-hidden');
+          safe4.classList.remove('is-hidden');
+          winnerPrize.classList.remove('is-hidden');
+          
+          document.getElementById("prize").innerHTML="A speaker";
+          
+        } else {
+          
+          successMessage.classList.remove('is-hidden');
+          safe3.classList.remove('is-hidden');
+          safe2.classList.add('is-hidden');
+          loading.classList.add('is-hidden');
+          
+        }
+      }, 250);
+    }
+    
+    function showErrorMessage(error) {
+      console.error('Error!', error.message);
+      setTimeout(function () {
+        errorMessage.classList.remove('is-hidden');
+        loading.classList.add('is-hidden');
+      }, 250);
+    }
+    
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+  </script>
+
+</body>
+</html>
