@@ -51,6 +51,7 @@
           <div class="state-error js-error-message is-hidden">
             <h2>CODE HAS<br/>ALREADY BEEN USED...</h2>
           </div>
+          
         </div>
 
       </div>
@@ -102,29 +103,41 @@
       if (formCode > 'K'+20001 && formCode < 'K'+20459) {
         
         // iPad
-        if (formCode == 'K20131' || formCode == 'K20144') {
-          document.getElementById('form-winner').value = 'ipad';
-        }
+        //if (formCode == 'K20131' || formCode == 'K20144') {
+        //  document.getElementById('form-winner').value = 'ipad';
+       // }
         
         // Voucher
-        if (formCode == 'K20044' || formCode == 'K20053' || formCode == 'K20137' || formCode == 'K20174' || formCode == 'K20203' || formCode == 'K20211' || formCode == 'K20251' || formCode == 'K20283' || formCode == 'K20289' || formCode == 'K20352' || formCode == 'K20362' || formCode == 'K20441') {
-          document.getElementById('form-winner').value = 'voucher';
-        }
+       // if (formCode == 'K20044' || formCode == 'K20053' || formCode == 'K20137' || formCode == 'K20174' || formCode == 'K20203' || formCode == 'K20211' || formCode == 'K20251' || formCode == 'K20283' || formCode == 'K20289' || formCode == 'K20352' || formCode == 'K20362' || formCode == 'K20441') {
+       //   document.getElementById('form-winner').value = 'voucher';
+       // }
         
         // Speaker
-        if (formCode == 'K20151' || formCode == 'K20337' || formCode == 'K20442') {
-          document.getElementById('form-winner').value = 'speaker';
-        }
-    
+       // if (formCode == 'K20151' || formCode == 'K20337' || formCode == 'K20442') {
+       //   document.getElementById('form-winner').value = 'speaker';
+       // }
+         
+        var surname = document.forms['submit-to-google-sheet']['surname'].value;
         showLoadingIndicator();
         fetch(scriptURL, {
-          method: 'POST',
-          body: new FormData(form)
-        }).then(function (response) {
-          return showSuccessMessage(response);
-        }).catch(function (error) {
-          return showErrorMessage(error);
-        });
+        method: 'POST',
+        body: JSON.stringify({'surname': surname, 'code': formCode})
+        }).then((resp) => resp.json()) // Transform the data into json
+          .then(function(data) {
+            var status = data.status
+            document.getElementById('form-winner').value = data["priceItem"]
+            if(status === 1 || status === 2 || status === 5){
+                showSuccessMessage()
+            }else if(status === 3){
+                showErrorMessage("<h2>CODE HAS<br/>ALREADY BEEN USED...</h2>")
+            }else if(status === 4){
+                showErrorMessage("<h2>Code and surname<br/>Didnt matched with records...</h2>")
+            }
+           }).catch(function(error) {
+                console.log(error);
+                showErrorMessage("<h2>FAILED<br/>Can't check at the moment...</h2>")
+            });
+         
         return;
         
       } else {
@@ -142,7 +155,7 @@
       safe2.classList.remove('is-hidden');
     }
     
-    function showSuccessMessage(response) {
+    function showSuccessMessage() {
       setTimeout(function () {
         if (document.getElementById('form-winner').value == 'ipad') {
           
@@ -185,8 +198,8 @@
       }, 250);
     }
     
-    function showErrorMessage(error) {
-      console.error('Error!', error.message);
+    function showErrorMessage(message) {
+      errorMessage.innerHTML = message
       setTimeout(function () {
         errorMessage.classList.remove('is-hidden');
         loading.classList.add('is-hidden');
